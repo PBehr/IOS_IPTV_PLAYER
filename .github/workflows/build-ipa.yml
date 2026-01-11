@@ -26,8 +26,8 @@ jobs:
         run: |
           curl -L -o GoogleCastSDK.zip "https://dl.google.com/dl/chromecast/sdk/ios/GoogleCastSDK-ios-4.8.4_dynamic.zip"
           unzip -q GoogleCastSDK.zip
-          mv GoogleCastSDK-ios-4.8.4_dynamic/GoogleCast.xcframework sources/
-          rm -rf GoogleCastSDK.zip GoogleCastSDK-ios-4.8.4_dynamic
+          mv GoogleCastSDK-ios-4.8.4_dynamic_xcframework/GoogleCast.xcframework sources/
+          rm -rf GoogleCastSDK.zip GoogleCastSDK-ios-4.8.4_dynamic_xcframework
 
       - name: Build archive (no code signing)
         run: |
