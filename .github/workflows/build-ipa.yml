@@ -1,0 +1,49 @@
+name: Build unsigned IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Carthage
+        run: brew install carthage
+
+      - name: Carthage bootstrap
+        working-directory: sources
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: carthage bootstrap --use-xcframeworks --platform iOS
+
+      - name: Build archive (no code signing)
+        run: |
+          xcodebuild \
+            -workspace "sources/IPTV.xcworkspace" \
+            -scheme "IPTV-iOS" \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath "$PWD/build/IPTV.xcarchive" \
+            clean archive \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
+      - name: Create unsigned IPA
+        run: |
+          APP_PATH="$PWD/build/IPTV.xcarchive/Products/Applications"/*.app
+          mkdir -p Payload
+          cp -R "$APP_PATH" Payload/
+          cd Payload
+          zip -qry "../IPTV-unsigned.ipa" .
+        working-directory: ${{ github.workspace }}
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: IPTV-unsigned-ipa
+          path: IPTV-unsigned.ipa
